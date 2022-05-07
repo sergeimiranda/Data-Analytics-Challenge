@@ -89,27 +89,51 @@ Data_Normalizada = Data_Normalizada.replace(to_replace = '^Neuqu.*', value = 'Ne
 Data_Normalizada = Data_Normalizada.replace(to_replace = '^Santa F.*', value = 'Santa Fe',regex = True)  #Arregla Santa Fe
 Data_Normalizada = Data_Normalizada.replace(to_replace = '^Tierra del Fueg.*', value = 'Tierra del Fuego, Antártida e Islas del Atlántico Sur',regex = True)  #Arregla Tierra del Fuego
 
-# PROCESADO INFORMACIÓN
-# PROCESADO INFORMACIÓN
+######### PROCESADO INFORMACIÓN
+################### Cálculo de Registros
+Columnas = ['Registro','Tipo','Total','Fecha']
+Tabla_Registros = pd.DataFrame(columns = Columnas)  #Creación Tabla
 
-Registros_Categoria = Data_Normalizada.count()  # Cuenta de registros por categoría
+#Cálculo de cantidad de registros totales por categoría
+Categoria = Data_Normalizada.categoria.unique()  # Array de categorías
+Hoy = dt.datetime.now()
+Fecha = str(Hoy.year) + "-" + str(Hoy.month) + "-" + str(Hoy.day) # Fecha para dato de día de carga
+Total_Categoria  = Data_Normalizada.groupby(['categoria']).categoria.count() # Cálculo de totales por categoría
 
-Fuentes = Data_Normalizada.categoria.unique()  # Array de fuentes
+for cat in Categoria:
+    Fila = pd.DataFrame(np.array([['categoria', cat, Total_Categoria[cat], Fecha]]),columns = Columnas) #Generación agregado fila
+    Tabla_Registros = pd.concat([Tabla_Registros,Fila], axis = 0, join='inner', ignore_index= True) # Agregado Fila
 
-Registros_Fuentes = Data_Normalizada.groupby(['categoria']).categoria.count() #Cant. Registros Fuentes
+#Cálculo de Registros totales por Fuentes:
+Fila = pd.DataFrame(np.array([['fuente', 'Fuente Museos', Data_Museos.count().sum(), Fecha]]),columns = Columnas) #Totales Museos
+Tabla_Registros = pd.concat([Tabla_Registros,Fila], axis = 0, join='inner', ignore_index= True)
 
+Fila = pd.DataFrame(np.array([['fuente', 'Fuente Cines', Data_Cines.count().sum(), Fecha]]),columns = Columnas) #Totales Cines
+Tabla_Registros = pd.concat([Tabla_Registros,Fila], axis = 0, join='inner', ignore_index= True)
 
-Registros_Categoria = Data_Normalizada.count()  # Cuenta de registros por categoría
+Fila = pd.DataFrame(np.array([['fuente', 'Fuente Bibliotecas', Data_Bibliotecas.count().sum(), Fecha]]),columns = Columnas) #Totales Bibliotecas
+Tabla_Registros = pd.concat([Tabla_Registros,Fila], axis = 0, join='inner', ignore_index= True)
 
-Fuentes = Data_Normalizada.categoria.unique()  # Array de fuentes
+#Cálculo de Registros por Provincia y Categoría
+Provincias = Data_Normalizada.provincia.unique()
+Total_Provincias = Data_Normalizada.groupby(['provincia','categoria']).categoria.count() # Cálculo de totales por provincia y categoría
 
-Registros_Fuentes = Data_Normalizada.groupby(['categoria']).categoria.count() #Cant. Registros Fuentes
+for prov in Provincias:
+    for cat in Categoria:
+        Fila = pd.DataFrame(np.array([[prov, cat, Total_Provincias[prov][cat], Fecha]]), columns=Columnas)  # Generación agregado fila
+        Tabla_Registros = pd.concat([Tabla_Registros, Fila], axis=0, join='inner', ignore_index=True)  # Agregado Fila
 
+################## Procesamiento Información Cines:
+Columnas = ['Provincia','Cantidad Pantallas','Cantidad Butacas','Cantidad Espacios INCAA','Fecha']
+Tabla_Cine = pd.DataFrame(columns = Columnas)  #Creación Tabla
 
+Pantallas = Data_Cines.groupby(['provincia'])['Pantallas'].count() # Cálculo cantidad Pantallas
+Butacas = Data_Cines.groupby(['provincia'])['Butacas'].count() # Cálculo cantidad Butacas
+INCAA = Data_Cines.groupby(['provincia'])['espacio_INCAA'].count() # Cálculo cantidad INCAA
 
+#Total_Cines = Data_Cines.groupby(['provincia']).agg({'Pantallas':['count'], 'Butacas':['count'], 'espacio_INCAA':['count']}) # Cálculo totales Cines
+Provincias = Data_Cines.provincia.unique()
 
-
-
-
-#####
-Data_Normalizada.groupby(['provincia','categoria']).agg({'categoria':['count']})
+for prov in Provincias:
+    Fila = pd.DataFrame(np.array([[prov, Pantallas[prov], Butacas[prov], INCAA[prov], Fecha]]), columns = Columnas) #Generación agregado fila
+    Tabla_Cine = pd.concat([Tabla_Cine, Fila], axis=0, join='inner', ignore_index=True)  # Agregado Fila

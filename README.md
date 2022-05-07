@@ -1,4 +1,7 @@
 # Data-Analytics-Challenge
 Alkemy Data Analytics Challenge
 
-See "Challenge Data Analytics con Python.pdf" for Challenge details.
+## Detalles del desafío
+Ver Challenge Data Analytics con Python.pdf para los detalles y requerimientos
+
+
