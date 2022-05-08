@@ -7,6 +7,9 @@ import datetime as dt
 from os import makedirs
 import pandas as pd
 import numpy as np
+import psycopg2
+from db_config import config
+from sqlalchemy import create_engine
 
 
 ############## DESCARGA ARCHIVOS ###########################
@@ -137,3 +140,25 @@ Provincias = Data_Cines.provincia.unique()
 for prov in Provincias:
     Fila = pd.DataFrame(np.array([[prov, Pantallas[prov], Butacas[prov], INCAA[prov], Fecha]]), columns = Columnas) #Generación agregado fila
     Tabla_Cine = pd.concat([Tabla_Cine, Fila], axis=0, join='inner', ignore_index=True)  # Agregado Fila
+
+
+######################################################
+# CARGA DATOS SQL DB
+
+
+#Conectar a base de datos Postgre / SQA:
+params = config()
+
+# Scheme: "postgres+psycopg2://<USERNAME>:<PASSWORD>@<IP_ADDRESS>:<PORT>/<DATABASE_NAME>"
+database_uri = 'postgresql+psycopg2://' +  params['user'] + ':' + params['password'] + '@' + params['host'] + ':' + '5432' + '/' + params['database']
+
+engine = create_engine(database_uri) # Creación engine SQA
+
+Tabla_Registros.to_sql('registros',con = engine, if_exists = 'replace', index = False )
+Tabla_Cine.to_sql('cines',con = engine, if_exists = 'replace', index = False )
+
+
+
+
+
+
