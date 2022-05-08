@@ -145,7 +145,6 @@ for prov in Provincias:
 ######################################################
 # CARGA DATOS SQL DB
 
-
 #Conectar a base de datos Postgre / SQA:
 params = config()
 
